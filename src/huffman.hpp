@@ -15,7 +15,7 @@ using namespace std;
 
 
 
-class Huffman {
+class MGCZip {
     private:
         AVLMap<char, string> encoding;
         link huffmanTree;
@@ -32,9 +32,11 @@ class Huffman {
         void buildHuffmanTree(StringBuffer data);
         BitStream squeeze(StringBuffer data);
         string unsqueeze(BitStream encoded);
-        void levelorder(link root);
+        void levelorder(link rootnode);
+        void cleanup(link node);
     public:
-        Huffman();
+        MGCZip();
+        ~MGCZip();
         void compress(string filename);
         void uncompress(string filename);
 };

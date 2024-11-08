@@ -1,16 +1,20 @@
 #include "huffman.hpp"
 
-Huffman::Huffman() {
+MGCZip::MGCZip() {
     huffmanTree = nullptr;
 }
 
-void Huffman::compress(string filename) {
+MGCZip::~MGCZip() {
+    cleanup(huffmanTree);
+}
+
+void MGCZip::compress(string filename) {
     StringBuffer sbuff = readBinaryFile(filename);
     BitStream compressed = squeeze(sbuff);
     writeCompressedFile(compressed, filename);
 }
 
-void Huffman::uncompress(string filename) {
+void MGCZip::uncompress(string filename) {
     StringBuffer compressed = readBinaryFile(filename);
     BitStream inf;
     while (!compressed.done()) { 
@@ -30,13 +34,21 @@ void Huffman::uncompress(string filename) {
     opf.close();       
 }
 
-void Huffman::printEncodingTable() {
+void MGCZip::printEncodingTable() {
     for (auto it = encoding.iterator(); !it.done(); it.next()) {
         cout<<it.get().key()<<": "<<it.get().value()<<endl;
     }
 }
 
-AVLMap<char, link> Huffman::computeFrequencies(StringBuffer data) {
+void MGCZip::cleanup(link node) {
+    if (node != nullptr) {
+        cleanup(node->left);
+        cleanup(node->right);
+        delete node;
+    }
+}
+
+AVLMap<char, link> MGCZip::computeFrequencies(StringBuffer data) {
     AVLMap<char, link> freq;
     while (!data.done()) {
         char c = data.get();
@@ -50,11 +62,11 @@ AVLMap<char, link> Huffman::computeFrequencies(StringBuffer data) {
     return freq;
 }
 
-bool Huffman::isLeaf(link h) {
+bool MGCZip::isLeaf(link h) {
     return (h->left == nullptr && h->right == nullptr);
 }
 
-void Huffman::generateEncodingTable(link h, string prefix) {
+void MGCZip::generateEncodingTable(link h, string prefix) {
     if (h != nullptr) {
         if (isLeaf(h)) {
             encoding.insert(h->symbol, prefix);
@@ -65,7 +77,7 @@ void Huffman::generateEncodingTable(link h, string prefix) {
     }
 }
 
-void Huffman::encodeTrie(HuffmanNode* x) {
+void MGCZip::encodeTrie(HuffmanNode* x) {
     if (isLeaf(x)) {
         trieStream.writeBit(true);
         trieStream.writeChar(x->symbol, 8);
@@ -76,14 +88,14 @@ void Huffman::encodeTrie(HuffmanNode* x) {
     encodeTrie(x->right);
 }
 
-HuffmanNode* Huffman::decodeTrie() {
+HuffmanNode* MGCZip::decodeTrie() {
     if (trieStream.readBit()) {
         return new HuffmanNode(trieStream.readChar(), 0, nullptr, nullptr);
     }
     return new HuffmanNode('\0', 0, decodeTrie(), decodeTrie());
 }
 
-void Huffman::validateHeader() {
+void MGCZip::validateHeader() {
     bool pass = true;
     string header = "leet";
     for (char c : header) {
@@ -97,7 +109,7 @@ void Huffman::validateHeader() {
     }
 }
 
-void Huffman::writeCompressedFile(BitStream compressed, string filename) {
+void MGCZip::writeCompressedFile(BitStream compressed, string filename) {
     std::ofstream file(filename+".mgz", std::ios::out|std::ios::binary);
     compressed.start();
     for (int j = 0; j < compressed.size(); ) {
@@ -115,13 +127,13 @@ void Huffman::writeCompressedFile(BitStream compressed, string filename) {
     file.close();
 }
 
-StringBuffer Huffman::readBinaryFile(string filename) {
+StringBuffer MGCZip::readBinaryFile(string filename) {
     StringBuffer data;
     data.readBinaryFile(filename);
     return data;
 }
 
-void Huffman::buildHuffmanTree(StringBuffer data) {
+void MGCZip::buildHuffmanTree(StringBuffer data) {
     MinHeap<link, HuffCmp> pq;
     AVLMap<char, link> freq = computeFrequencies(data);
     for (auto it = freq.iterator(); !it.done(); it.next()) {
@@ -138,7 +150,7 @@ void Huffman::buildHuffmanTree(StringBuffer data) {
     huffmanTree = pq.pop();
 }
 
-BitStream Huffman::squeeze(StringBuffer data) {
+BitStream MGCZip::squeeze(StringBuffer data) {
     string prefix, output;
     BitStream result;
     result.writeChar('l',8);
@@ -164,7 +176,7 @@ BitStream Huffman::squeeze(StringBuffer data) {
     }
     return result;
 }
-string Huffman::unsqueeze(BitStream encoded) {
+string MGCZip::unsqueeze(BitStream encoded) {
     int i = 0;
     string result;
     link x = nullptr;
@@ -196,7 +208,7 @@ string Huffman::unsqueeze(BitStream encoded) {
     return result;
 }
 
-void Huffman::levelorder(link h) {
+void MGCZip::levelorder(link h) {
     queue<link> fq;
     fq.push(h);
     while (!fq.empty()) {
