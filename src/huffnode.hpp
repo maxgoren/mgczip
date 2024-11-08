@@ -19,4 +19,28 @@ struct HuffCmp {
 
 using link = HuffmanNode*;
 
+struct Levelorder {
+    void operator()(link node) {
+        bfs(node);
+    }
+    void bfs(link h) {
+        queue<link> fq;
+        fq.push(h);
+        while (!fq.empty()) {
+            int nc = fq.size();
+            while (nc > 0) {
+                link t = fq.front();
+                fq.pop();
+                nc--;
+                if (t != nullptr) {
+                    cout<<"["<<t->symbol<<":("<<t->frequency<<")]";
+                    fq.push(t->left);
+                    fq.push(t->right);
+                }
+            }
+            cout<<endl;
+        }
+    }
+};
+
 #endif
