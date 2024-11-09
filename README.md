@@ -1,8 +1,10 @@
 # mgczip
 Compress ya self before you wreck ya self!
 
-Lossless data compression with mgczip provides > 50% reduction in space usage 
-for _most_ text thanks to huffman encoding. 
+Lossless data compression with mgczip provides > 50% reduction in space usage for _many_ file types. 
+Supported encodings are Huffman encoding & LZW encoding. Mgczip is intended for use on single files,
+support for archiving might be added in future release.
+
 
 ## installation and usage
 
@@ -10,6 +12,8 @@ for _most_ text thanks to huffman encoding.
       sudo make install
       make clean
 
-      mgczip -c <filename> to compress file
-      mgczip -d <filename> to decompress file
+      mgczip -ch <filename> to compress file using huffman coding
+      mgczip -cl <filename> to compress file using LZW
+      mgczip -dh <filename> to decompress file using huffman coding
+      mgczip -dl <filename> to decompress file using LZW
   
