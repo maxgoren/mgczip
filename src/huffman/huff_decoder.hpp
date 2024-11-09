@@ -13,34 +13,31 @@ class HuffDecoder {
         bool isLeaf(link h);
         HuffmanNode* decodeTrie();
         void validateHeader();
-        StringBuffer readBinaryFile(string filename);
         string unsqueeze(BitStream encoded);
         void cleanup(link node);
     public:
         HuffDecoder();
         ~HuffDecoder();
-        void uncompress(string filename);
+        void uncompress(StringBuffer sbuff, string outfile);
 
 };
 
 HuffDecoder::HuffDecoder() {
-
+    huffmanTree = nullptr;
 }
 
 HuffDecoder::~HuffDecoder() {
     cleanup(huffmanTree);
 }
 
-void HuffDecoder::uncompress(string filename) {
-    StringBuffer compressed = readBinaryFile(filename);
+void HuffDecoder::uncompress(StringBuffer compressed, string outfile) {
     BitStream inf;
     while (!compressed.done()) { 
         inf.writeChar(compressed.get(), 8); 
         compressed.advance(); 
     }
     string uncompressed = unsqueeze(inf);
-    string new_file_name = filename.substr(0, filename.size() - 4)  + ".2";
-    ofstream opf(new_file_name);
+    ofstream opf(outfile);
     if (opf.is_open()) {
         for (unsigned char c : uncompressed) {
             opf << c;
@@ -76,18 +73,16 @@ void HuffDecoder::validateHeader() {
     for (char c : header) {
         if (c != trieStream.readChar()) {
             pass = false;
+        } else {
+            cout<<c;
         }
     }
     if (!pass) {
         cout<<"Invalid Header, aborting."<<endl;
         exit(0);
+    } else {
+        cout<<", Headers Match! Decompressing..."<<endl;
     }
-}
-
-StringBuffer HuffDecoder::readBinaryFile(string filename) {
-    StringBuffer data;
-    data.readBinaryFile(filename);
-    return data;
 }
 
 string HuffDecoder::unsqueeze(BitStream encoded) {

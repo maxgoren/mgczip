@@ -14,8 +14,8 @@ class MGCZip {
     private:
         void calculateCompressionRatio(string filename);
         void writeCompressedFile(BitStream compressed, string filename);
-        void compressWithBoth(string filename);
-        void decompressWithBoth(string filename);
+        BitStream compressWithBoth(StringBuffer sbuff);
+        void decompressWithBoth(StringBuffer sbuff, string outfile);
     public:
         MGCZip();
         void compress(string filename, METHOD method);
@@ -27,30 +27,36 @@ MGCZip::MGCZip() {
 }
 
 void MGCZip::decompress(string filename, METHOD method) {
-    HuffDecoder huff;
-    LZWDecoder lzw;
+    StringBuffer strBuff;
+    strBuff.readBinaryFile(filename);
+    string outfile = filename.substr(0, filename.size() - 4)  + ".2";
     switch (method) {
-        case HUFFMAN: huff.uncompress(filename); break;
-        case LZW: lzw.uncompress(filename); break;
-        case BOTH: decompressWithBoth(filename); break;
+        case HUFFMAN: { HuffDecoder huff; huff.uncompress(strBuff, outfile); } break;
+        case LZW: { LZWDecoder lzw; lzw.uncompress(strBuff, outfile); } break;
+        case BOTH: decompressWithBoth(filename, outfile); break;
         default:
             break;
     }
 }
 
 void MGCZip::compress(string filename, METHOD method) {
-    HuffEncoder huff;
-    LZWEncoder lzw;
+    StringBuffer strBuff;
+    strBuff.readBinaryFile(filename);
     BitStream bs;
     switch (method) {
-        case HUFFMAN: 
-            bs = huff.compress(filename); 
+        case HUFFMAN: {
+                HuffEncoder huff;
+                bs = huff.compress(strBuff); 
+            }
             break;
-        case LZW: 
-            bs = lzw.compress(filename); 
+        case LZW: {
+                LZWEncoder lzw;
+                bs = lzw.compress(strBuff); 
+            }
             break;
         case BOTH:
-            compressWithBoth(filename);
+            bs = compressWithBoth(strBuff);
+            break;
         default:
             break;
     }
@@ -58,18 +64,28 @@ void MGCZip::compress(string filename, METHOD method) {
     calculateCompressionRatio(filename);
 }
 
-void MGCZip::compressWithBoth(string filename) {
+BitStream MGCZip::compressWithBoth(StringBuffer sb) {
     HuffEncoder huff;
     LZWEncoder lzw;
-    huff.compress(filename);
-    lzw.compress(filename + ".mgz");
+    BitStream bs;
+    bs = huff.compress(sb);
+    StringBuffer mergebuffer;
+    string strRep;
+    bs.start();
+    while (!bs.done()) {
+        strRep.push_back(bs.readChar());
+    }
+    mergebuffer.init(strRep);
+    bs = lzw.compress(mergebuffer);
+    return bs;
 }
 
-void MGCZip::decompressWithBoth(string filename) {
+void MGCZip::decompressWithBoth(StringBuffer sb, string filename) {
         HuffDecoder huff;
         LZWDecoder lzw;
-        lzw.uncompress(filename);
-        huff.uncompress(filename.substr(0, filename.size() - 4) + ".2");
+        lzw.uncompress(sb, filename);
+        cout<<"LZW done."<<endl;
+        huff.uncompress(sb, filename.substr(0, filename.size() - 4) + ".2");
 }
 
 void MGCZip::writeCompressedFile(BitStream compressed, string filename) {

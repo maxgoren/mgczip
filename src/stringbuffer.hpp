@@ -3,24 +3,17 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
-#include <vector>
 using namespace std;
 
 
 class StringBuffer {
     private:
-        vector<string> lines;
         char eosChar;
         string buff;
         int spos;
-        int lpos;
     public:
         StringBuffer() {
             eosChar = 0x70;
-        }
-        StringBuffer(vector<string> lns) {
-            eosChar = 0x70;
-            init(lns);
         }
         StringBuffer(string line) {
             eosChar = 0x70;
@@ -29,25 +22,12 @@ class StringBuffer {
         bool done() {
             return spos >= buff.size();
         }
-        void init(vector<string> lns) {
-            lines.clear();
-            lines = lns;
-            spos = 0; 
-            lpos = 0;
-            buff = lines[lpos];
-        }
         void init(string line) {
-            lines.clear();
-            lines.push_back(line);
             spos = 0;
-            lpos = 0;
-            buff = lines[lpos];
-        }
-        int lineNo() {
-            return lpos;
+            buff = line;
         }
         unsigned char get() {
-            if (spos >= buff.length() && lpos >= lines.size()) {
+            if (spos >= buff.length()) {
                     return eosChar; 
             }
             return buff[spos];
@@ -55,12 +35,7 @@ class StringBuffer {
         unsigned char advance() {
             spos++;
             if (spos >= buff.length()) {
-                lpos++;
-                if (lpos >= lines.size()) {
-                    return eosChar;
-                }
-                spos = 0;
-                buff = lines[lpos];
+                return eosChar;
             }
             return buff[spos];
         }

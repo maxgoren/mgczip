@@ -15,7 +15,7 @@ class LZWDecoder {
         void validateHeader(BitStream& bs);
     public:
         LZWDecoder();
-        void uncompress(string filename);
+        void uncompress(StringBuffer strbuff, string outfile);
 };
 
 LZWDecoder::LZWDecoder() {
@@ -24,9 +24,7 @@ LZWDecoder::LZWDecoder() {
     bit_width = 12;
 }
 
-void LZWDecoder::uncompress(string filename) {
-    StringBuffer sb;
-    sb.readBinaryFile(filename);
+void LZWDecoder::uncompress(StringBuffer sb, string outfile) {
     BitStream bs;
     while (!sb.done()) {
         bs.writeChar(sb.get(), 8);
@@ -35,8 +33,7 @@ void LZWDecoder::uncompress(string filename) {
     bs.start();
     validateHeader(bs);
     string uncompressed = decompress(bs);
-    string new_file_name = filename.substr(0, filename.size() - 4)  + ".2";
-    ofstream opf(new_file_name);
+    ofstream opf(outfile);
     if (opf.is_open()) {
         for (unsigned char c : uncompressed) {
             opf << c;
@@ -51,11 +48,15 @@ void LZWDecoder::validateHeader(BitStream& bs) {
     for (char c : header) {
         if (c != bs.readChar()) {
             pass = false;
+        } else {
+            cout<<c;
         }
     }
     if (!pass) {
         cout<<"Invalid Header, aborting."<<endl;
         exit(0);
+    } else {
+        cout<<", Headers Match! Decompressing..."<<endl;
     }
 }
 

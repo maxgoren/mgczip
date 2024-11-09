@@ -18,9 +18,6 @@ class BitStream {
             bitcount = bs.bitcount;
             buffer = bs.buffer;
         }
-        int size() {
-            return bitcount;
-        }
         bool readBit() {
             int byteIndex = bitpos / 8;
             int bitIndex = bitpos % 8;
@@ -73,17 +70,17 @@ class BitStream {
                 writeBit((value >> i) & 1);
             }
         }
-        const std::vector<unsigned char>& getBuffer() const {
-            return buffer;
+        int size() {
+            return bitcount;
         }
-        bool done() {
-            return bitpos >= bitcount;
+        void start() {
+            bitpos = 0;
         }
         int offset() {
             return bitpos;
         }
-        void start() {
-            bitpos = 0;
+        bool done() {
+            return bitpos >= bitcount;
         }
         void flush() {
             buffer.clear();

@@ -17,28 +17,25 @@ class HuffEncoder {
         void generateEncodingTable(link h, string prefix);
         void addHeader();
         void encodeTrie(HuffmanNode* x);
-        StringBuffer readBinaryFile(string filename);
         void buildHuffmanTree(StringBuffer data);
         BitStream squeeze(StringBuffer data);
         void cleanup(link node);
     public:
         HuffEncoder();
         ~HuffEncoder();
-        BitStream compress(string filename);
+        BitStream compress(StringBuffer strbuff);
 };
 
 HuffEncoder::HuffEncoder() {
-
+    huffmanTree = nullptr;
 }
 
 HuffEncoder::~HuffEncoder() {
     cleanup(huffmanTree);
 }
 
-BitStream HuffEncoder::compress(string filename) {
-    StringBuffer sbuff = readBinaryFile(filename);
-    BitStream compressed = squeeze(sbuff);
-    return compressed;
+BitStream HuffEncoder::compress(StringBuffer sbuff) {
+    return squeeze(sbuff);
 }
 
 void HuffEncoder::cleanup(link node) {
@@ -96,13 +93,6 @@ void HuffEncoder::encodeTrie(HuffmanNode* x) {
     encodeTrie(x->right);
 }
 
-
-StringBuffer HuffEncoder::readBinaryFile(string filename) {
-    StringBuffer data;
-    data.readBinaryFile(filename);
-    return data;
-}
-
 void HuffEncoder::buildHuffmanTree(StringBuffer data) {
     MinHeap<link, HuffCmp> pq;
     AVLMap<char, link> freq = computeFrequencies(data);
@@ -118,6 +108,7 @@ void HuffEncoder::buildHuffmanTree(StringBuffer data) {
         pq.push(tmp);
     }
     huffmanTree = pq.pop();
+    Levelorder()(huffmanTree);
 }
 
 void HuffEncoder::addHeader() {
@@ -131,7 +122,6 @@ void HuffEncoder::addHeader() {
 BitStream HuffEncoder::squeeze(StringBuffer data) {
     string prefix, output;
     buildHuffmanTree(data);
-    Levelorder()(huffmanTree);
     generateEncodingTable(huffmanTree, prefix);
     printEncodingTable();
     addHeader();

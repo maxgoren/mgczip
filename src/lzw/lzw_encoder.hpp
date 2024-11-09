@@ -14,7 +14,7 @@ class LZWEncoder {
         void addHeader(BitStream& bs);
     public:
         LZWEncoder();
-        BitStream compress(string filename);
+        BitStream compress(StringBuffer strbuff);
 };
 
 LZWEncoder::LZWEncoder() {
@@ -23,9 +23,7 @@ LZWEncoder::LZWEncoder() {
     bit_width = 12;
 }
 
-BitStream LZWEncoder::compress(string filename) {
-    StringBuffer sb;
-    sb.readBinaryFile(filename);
+BitStream LZWEncoder::compress(StringBuffer sb) {
     return squeeze(sb);
 }
 
