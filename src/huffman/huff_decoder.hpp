@@ -1,11 +1,11 @@
-#ifndef decoder_hpp
-#define decoder_hpp
-#include "avlmap.hpp"
-#include "bitstream.hpp"
+#ifndef huff_decoder_hpp
+#define huff_decoder_hpp
+#include "../avlmap.hpp"
+#include "../bitstream.hpp"
+#include "../stringbuffer.hpp"
 #include "huffnode.hpp"
-#include "stringbuffer.hpp"
 
-class Decoder {
+class HuffDecoder {
     private:
         AVLMap<char, string> encoding;
         link huffmanTree;
@@ -17,21 +17,21 @@ class Decoder {
         string unsqueeze(BitStream encoded);
         void cleanup(link node);
     public:
-        Decoder();
-        ~Decoder();
+        HuffDecoder();
+        ~HuffDecoder();
         void uncompress(string filename);
 
 };
 
-Decoder::Decoder() {
+HuffDecoder::HuffDecoder() {
 
 }
 
-Decoder::~Decoder() {
+HuffDecoder::~HuffDecoder() {
     cleanup(huffmanTree);
 }
 
-void Decoder::uncompress(string filename) {
+void HuffDecoder::uncompress(string filename) {
     StringBuffer compressed = readBinaryFile(filename);
     BitStream inf;
     while (!compressed.done()) { 
@@ -51,7 +51,7 @@ void Decoder::uncompress(string filename) {
     opf.close();       
 }
 
-void Decoder::cleanup(link node) {
+void HuffDecoder::cleanup(link node) {
     if (node != nullptr) {
         cleanup(node->left);
         cleanup(node->right);
@@ -59,20 +59,20 @@ void Decoder::cleanup(link node) {
     }
 }
 
-bool Decoder::isLeaf(link h) {
+bool HuffDecoder::isLeaf(link h) {
     return (h->left == nullptr && h->right == nullptr);
 }
 
-HuffmanNode* Decoder::decodeTrie() {
+HuffmanNode* HuffDecoder::decodeTrie() {
     if (trieStream.readBit()) {
         return new HuffmanNode(trieStream.readChar(), 0, nullptr, nullptr);
     }
     return new HuffmanNode('\0', 0, decodeTrie(), decodeTrie());
 }
 
-void Decoder::validateHeader() {
+void HuffDecoder::validateHeader() {
     bool pass = true;
-    string header = "leet";
+    string header = "MGCH";
     for (char c : header) {
         if (c != trieStream.readChar()) {
             pass = false;
@@ -84,14 +84,13 @@ void Decoder::validateHeader() {
     }
 }
 
-StringBuffer Decoder::readBinaryFile(string filename) {
+StringBuffer HuffDecoder::readBinaryFile(string filename) {
     StringBuffer data;
     data.readBinaryFile(filename);
     return data;
 }
 
-string Decoder::unsqueeze(BitStream encoded) {
-    int i = 0;
+string HuffDecoder::unsqueeze(BitStream encoded) {
     string result;
     link x = nullptr;
     trieStream = encoded;
@@ -101,8 +100,7 @@ string Decoder::unsqueeze(BitStream encoded) {
     Levelorder()(huffmanTree);
     int length = trieStream.readInt();
     cout<<"Length: "<<length<<endl;
-    i = trieStream.offset();
-    while (i < trieStream.size()) {
+    while (!trieStream.done()) {
         if (x == nullptr) {
             x = huffmanTree;
         }
@@ -115,7 +113,6 @@ string Decoder::unsqueeze(BitStream encoded) {
             } else {
                 x = x->left;
             }
-            i++;
         }
     }
     result.push_back(x->symbol);

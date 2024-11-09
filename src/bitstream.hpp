@@ -46,6 +46,13 @@ class BitStream {
             }
             return value;
         }
+        int readInt(int width) {
+            int value = 0;
+            for (int i = width - 1; i >= 0; --i) {
+                value |= (readBit() << i);
+            }
+            return value;
+        }
         void writeBit(bool bit) {
             int byteIndex = bitpos / 8;
             int bitIndex = bitpos % 8;
@@ -70,7 +77,7 @@ class BitStream {
             return buffer;
         }
         bool done() {
-            return bitpos < bitcount;
+            return bitpos >= bitcount;
         }
         int offset() {
             return bitpos;

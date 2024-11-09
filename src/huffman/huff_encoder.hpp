@@ -1,47 +1,47 @@
-#ifndef encoder_hpp
-#define encoder_hpp
-#include "avlmap.hpp"
-#include "bitstream.hpp"
+#ifndef huff_encoder_hpp
+#define huff_encoder_hpp
+#include "../avlmap.hpp"
+#include "../bitstream.hpp"
+#include "../stringbuffer.hpp"
+#include "../prique.hpp"
 #include "huffnode.hpp"
-#include "stringbuffer.hpp"
-#include "prique.hpp"
 
-class Encoder {
+class HuffEncoder {
     private:
         AVLMap<char, string> encoding;
         link huffmanTree;
-        BitStream trieStream;
+        BitStream resultStream;
         void printEncodingTable();
         AVLMap<char, link> computeFrequencies(StringBuffer data);
         bool isLeaf(link h);
         void generateEncodingTable(link h, string prefix);
+        void addHeader();
         void encodeTrie(HuffmanNode* x);
-        void writeCompressedFile(BitStream compressed, string filename);
         StringBuffer readBinaryFile(string filename);
         void buildHuffmanTree(StringBuffer data);
         BitStream squeeze(StringBuffer data);
         void cleanup(link node);
     public:
-        Encoder();
-        ~Encoder();
-        void compress(string filename);
+        HuffEncoder();
+        ~HuffEncoder();
+        BitStream compress(string filename);
 };
 
-Encoder::Encoder() {
+HuffEncoder::HuffEncoder() {
 
 }
 
-Encoder::~Encoder() {
+HuffEncoder::~HuffEncoder() {
     cleanup(huffmanTree);
 }
 
-void Encoder::compress(string filename) {
+BitStream HuffEncoder::compress(string filename) {
     StringBuffer sbuff = readBinaryFile(filename);
     BitStream compressed = squeeze(sbuff);
-    writeCompressedFile(compressed, filename);
+    return compressed;
 }
 
-void Encoder::cleanup(link node) {
+void HuffEncoder::cleanup(link node) {
     if (node != nullptr) {
         cleanup(node->left);
         cleanup(node->right);
@@ -49,13 +49,14 @@ void Encoder::cleanup(link node) {
     }
 }
 
-void Encoder::printEncodingTable() {
+void HuffEncoder::printEncodingTable() {
     for (auto it = encoding.iterator(); !it.done(); it.next()) {
         cout<<it.get().key()<<": "<<it.get().value()<<endl;
     }
+    cout<<"--------------"<<endl;
 }
 
-AVLMap<char, link> Encoder::computeFrequencies(StringBuffer data) {
+AVLMap<char, link> HuffEncoder::computeFrequencies(StringBuffer data) {
     AVLMap<char, link> freq;
     while (!data.done()) {
         char c = data.get();
@@ -69,11 +70,11 @@ AVLMap<char, link> Encoder::computeFrequencies(StringBuffer data) {
     return freq;
 }
 
-bool Encoder::isLeaf(link h) {
+bool HuffEncoder::isLeaf(link h) {
     return (h->left == nullptr && h->right == nullptr);
 }
 
-void Encoder::generateEncodingTable(link h, string prefix) {
+void HuffEncoder::generateEncodingTable(link h, string prefix) {
     if (h != nullptr) {
         if (isLeaf(h)) {
             encoding.insert(h->symbol, prefix);
@@ -84,42 +85,25 @@ void Encoder::generateEncodingTable(link h, string prefix) {
     }
 }
 
-void Encoder::encodeTrie(HuffmanNode* x) {
+void HuffEncoder::encodeTrie(HuffmanNode* x) {
     if (isLeaf(x)) {
-        trieStream.writeBit(true);
-        trieStream.writeChar(x->symbol, 8);
+        resultStream.writeBit(true);
+        resultStream.writeChar(x->symbol, 8);
         return;
     }
-    trieStream.writeBit(false);
+    resultStream.writeBit(false);
     encodeTrie(x->left);
     encodeTrie(x->right);
 }
 
-void Encoder::writeCompressedFile(BitStream compressed, string filename) {
-    std::ofstream file(filename+".mgz", std::ios::out|std::ios::binary);
-    compressed.start();
-    for (int j = 0; j < compressed.size(); ) {
-        int i = 0;
-        unsigned char byte = 0;
-        while (j < compressed.size() && i < 8) {
-            if (compressed.readBit()) {
-                byte |= (1 <<(7-i));
-            }
-            i++;
-            j++;
-        }
-        file.write(reinterpret_cast<const char*>(&byte), sizeof(byte));
-    }
-    file.close();
-}
 
-StringBuffer Encoder::readBinaryFile(string filename) {
+StringBuffer HuffEncoder::readBinaryFile(string filename) {
     StringBuffer data;
     data.readBinaryFile(filename);
     return data;
 }
 
-void Encoder::buildHuffmanTree(StringBuffer data) {
+void HuffEncoder::buildHuffmanTree(StringBuffer data) {
     MinHeap<link, HuffCmp> pq;
     AVLMap<char, link> freq = computeFrequencies(data);
     for (auto it = freq.iterator(); !it.done(); it.next()) {
@@ -136,31 +120,31 @@ void Encoder::buildHuffmanTree(StringBuffer data) {
     huffmanTree = pq.pop();
 }
 
-BitStream Encoder::squeeze(StringBuffer data) {
+void HuffEncoder::addHeader() {
+    resultStream.writeChar('M',8);
+    resultStream.writeChar('G', 8);
+    resultStream.writeChar('C', 8);
+    resultStream.writeChar('H', 8);
+
+}
+
+BitStream HuffEncoder::squeeze(StringBuffer data) {
     string prefix, output;
-    BitStream result;
-    result.writeChar('l',8);
-    result.writeChar('e', 8);
-    result.writeChar('e', 8);
-    result.writeChar('t', 8);
     buildHuffmanTree(data);
     Levelorder()(huffmanTree);
     generateEncodingTable(huffmanTree, prefix);
     printEncodingTable();
-    cout<<"--------------"<<endl;
+    addHeader();
     encodeTrie(huffmanTree);
-    trieStream.start();
-    for (int i = 0; i < trieStream.size(); i++)
-        result.writeBit(trieStream.readBit());
     while (!data.done()) {
         output += encoding.find(data.get()).value();
         data.advance();
     }
-    result.writeInt(output.size(), 8);
+    resultStream.writeInt(output.size(), 8);
     for (unsigned char c : output) {
-        result.writeBit(c == '1');
+        resultStream.writeBit(c == '1');
     }
-    return result;
+    return resultStream;
 }
 
 #endif

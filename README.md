@@ -12,3 +12,4 @@ for _most_ text thanks to huffman encoding.
 
       mgczip -c <filename> to compress file
       mgczip -d <filename> to decompress file
+  

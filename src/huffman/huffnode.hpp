@@ -1,6 +1,6 @@
 #ifndef huffnode_hpp
 #define huffnode_hpp
-#include "queue.hpp"
+#include "../queue.hpp"
 
 struct HuffmanNode {
     char symbol;

@@ -65,7 +65,6 @@ class StringBuffer {
             return buff[spos];
         }
         void readBinaryFile(string filename) {
-            vector<string> lines;
             filesystem::path p(filename);
             auto length = filesystem::file_size(p);
             fstream ifile(filename, std::ios::in|std::ios::binary);
@@ -76,9 +75,7 @@ class StringBuffer {
             string input;
             input.resize(length);
             ifile.read(reinterpret_cast<char*>(input.data()), length);
-            lines.push_back(input);
-            cout<<input;
-            init(lines);
+            init(input);
         }
 };
 
