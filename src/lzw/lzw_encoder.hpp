@@ -61,7 +61,6 @@ BitStream LZWEncoder::squeeze(StringBuffer istrbuff) {
         str = str.substr(t);
     }
     bs.writeInt(num_chars, bit_width);
-    cout<<(num_chars&0xFFF)<<endl;
     return bs;
 }
 
