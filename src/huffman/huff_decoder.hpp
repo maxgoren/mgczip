@@ -1,16 +1,15 @@
 #ifndef huff_decoder_hpp
 #define huff_decoder_hpp
-#include "../avlmap.hpp"
+#include "../hashmap.hpp"
 #include "../bitstream.hpp"
 #include "../stringbuffer.hpp"
 #include "huffnode.hpp"
 
 class HuffDecoder {
     private:
-        AVLMap<char, string> encoding;
+        HashMap<char, string> encoding;
         link huffmanTree;
         BitStream trieStream;
-        bool isLeaf(link h);
         HuffmanNode* decodeTrie();
         void validateHeader();
         string unsqueeze(BitStream encoded);
@@ -56,10 +55,6 @@ void HuffDecoder::cleanup(link node) {
     }
 }
 
-bool HuffDecoder::isLeaf(link h) {
-    return (h->left == nullptr && h->right == nullptr);
-}
-
 HuffmanNode* HuffDecoder::decodeTrie() {
     if (trieStream.readBit()) {
         return new HuffmanNode(trieStream.readChar(), 0, nullptr, nullptr);
@@ -103,14 +98,10 @@ string HuffDecoder::unsqueeze(BitStream encoded) {
             result.push_back(x->symbol);
             x = nullptr;
         } else {
-            if (trieStream.readBit()) {
-                x = x->right;
-            } else {
-                x = x->left;
-            }
+            x = trieStream.readBit() ? x->right:x->left;
         }
     }
-    result.push_back(x->symbol);
+    if (isLeaf(x)) result.push_back(x->symbol);
     return result;
 }
 

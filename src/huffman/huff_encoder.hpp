@@ -1,6 +1,6 @@
 #ifndef huff_encoder_hpp
 #define huff_encoder_hpp
-#include "../avlmap.hpp"
+#include "../hashmap.hpp"
 #include "../bitstream.hpp"
 #include "../stringbuffer.hpp"
 #include "../prique.hpp"
@@ -8,12 +8,11 @@
 
 class HuffEncoder {
     private:
-        AVLMap<char, string> encoding;
+        HashMap<char, string> encoding;
         link huffmanTree;
         BitStream resultStream;
         void printEncodingTable();
-        AVLMap<char, link> computeFrequencies(StringBuffer data);
-        bool isLeaf(link h);
+        HashMap<char, link> computeFrequencies(StringBuffer data);
         void generateEncodingTable(link h, string prefix);
         void addHeader();
         void encodeTrie(HuffmanNode* x);
@@ -53,8 +52,8 @@ void HuffEncoder::printEncodingTable() {
     cout<<"--------------"<<endl;
 }
 
-AVLMap<char, link> HuffEncoder::computeFrequencies(StringBuffer data) {
-    AVLMap<char, link> freq;
+HashMap<char, link> HuffEncoder::computeFrequencies(StringBuffer data) {
+    HashMap<char, link> freq;
     while (!data.done()) {
         char c = data.get();
         if (freq.find(c).empty()) {
@@ -67,9 +66,6 @@ AVLMap<char, link> HuffEncoder::computeFrequencies(StringBuffer data) {
     return freq;
 }
 
-bool HuffEncoder::isLeaf(link h) {
-    return (h->left == nullptr && h->right == nullptr);
-}
 
 void HuffEncoder::generateEncodingTable(link h, string prefix) {
     if (h != nullptr) {
@@ -95,7 +91,7 @@ void HuffEncoder::encodeTrie(HuffmanNode* x) {
 
 void HuffEncoder::buildHuffmanTree(StringBuffer data) {
     MinHeap<link, HuffCmp> pq;
-    AVLMap<char, link> freq = computeFrequencies(data);
+    HashMap<char, link> freq = computeFrequencies(data);
     for (auto it = freq.iterator(); !it.done(); it.next()) {
         pq.push(it.get().value());
         cout<<it.get().value()->symbol<<"("<<it.get().value()->frequency<<") ";

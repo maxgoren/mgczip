@@ -110,6 +110,9 @@ class HashTable {
         HTIterator<T> iterator() {
             return HTIterator<T>(table, maxn);
         }
+        HTIterator<T> iterator() const {
+            return HTIterator<T>(table, maxn);
+        }
         HashTable& operator=(const HashTable& ht) {
             if (this != &ht) {
                 n = 0;
