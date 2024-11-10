@@ -14,6 +14,15 @@ class PrefixTrie {
         trienode* root;
         int count;
         T nilInfo;
+        void cleanup(trienode* h) {
+            if (h == nullptr) 
+                return;
+            for (HTIterator<KVPair<char, trienode*>> it = h->next.iterator(); !it.done(); it.next()) {
+                cleanup(it.get().value());
+            }
+            delete h;
+            
+        }
     public:
         PrefixTrie() {
             count = 0;
@@ -21,7 +30,7 @@ class PrefixTrie {
             root->eos = false;
         }
         ~PrefixTrie() {
-
+            cleanup(root);
         }
         void insert(string key, T value) {
             trienode* x = root;
