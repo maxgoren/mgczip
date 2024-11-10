@@ -3,7 +3,7 @@ Compress ya self before you wreck ya self!
 
 Lossless data compression with mgczip provides > 50% reduction in space usage for _many_ file types. 
 Supported encodings are Huffman encoding & LZW encoding. Mgczip is intended for use on single files,
-support for archiving might be added in future release.
+support for archiving might be added in future release. Might add lz77 if i'm feeeling frisky.
 
 
 ## installation and usage
