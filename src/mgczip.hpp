@@ -4,10 +4,12 @@
 #include "huffman/huff_decoder.hpp"
 #include "lzw/lzw_encoder.hpp"
 #include "lzw/lzw_decoder.hpp"
+#include "lz77/lz77_encoder.hpp"
+#include "lz77/lz77_decoder.hpp"
 using namespace std;
 
 enum METHOD {
-    HUFFMAN, LZW, BOTH
+    HUFFMAN, LZW, LZ77, BOTH
 };
 
 class MGCZip {
@@ -32,8 +34,8 @@ void MGCZip::decompress(string filename, METHOD method) {
     string outfile = filename.substr(0, filename.size() - 4)  + ".2";
     switch (method) {
         case HUFFMAN: { HuffDecoder huff; huff.uncompress(strBuff, outfile); } break;
+        case LZ77: { LZ77Decoder lz; lz.uncompress(strBuff, outfile); } break;
         case LZW: { LZWDecoder lzw; lzw.uncompress(strBuff, outfile); } break;
-        case BOTH: decompressWithBoth(filename, outfile); break;
         default:
             break;
     }
@@ -49,35 +51,21 @@ void MGCZip::compress(string filename, METHOD method) {
                 bs = huff.compress(strBuff); 
             }
             break;
+        case LZ77: {
+                LZ77Encoder lz;
+                bs = lz.compress(strBuff); 
+            }
+            break;
         case LZW: {
                 LZWEncoder lzw;
                 bs = lzw.compress(strBuff); 
             }
-            break;
-        case BOTH:
-            bs = compressWithBoth(strBuff);
             break;
         default:
             break;
     }
     writeCompressedFile(bs, filename);
     calculateCompressionRatio(filename);
-}
-
-BitStream MGCZip::compressWithBoth(StringBuffer sb) {
-    HuffEncoder huff;
-    LZWEncoder lzw;
-    BitStream bs;
-    bs = huff.compress(sb);
-    StringBuffer mergebuffer;
-    string strRep;
-    bs.start();
-    while (!bs.done()) {
-        strRep.push_back(bs.readChar());
-    }
-    mergebuffer.init(strRep);
-    bs = lzw.compress(mergebuffer);
-    return bs;
 }
 
 void MGCZip::decompressWithBoth(StringBuffer sb, string filename) {

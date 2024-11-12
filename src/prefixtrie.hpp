@@ -10,18 +10,23 @@ class PrefixTrie {
             bool eos;
             T value;
             HashMap<char, trienode*> next;
+            trienode() { eos = false; }
         };
         trienode* root;
         int count;
         T nilInfo;
-        void cleanup(trienode* h) {
-            if (h == nullptr) 
-                return;
-            for (HTIterator<KVPair<char, trienode*>> it = h->next.iterator(); !it.done(); it.next()) {
-                cleanup(it.get().value());
+        void sortpft(trienode* h, int d, string pfix) {
+            if (h != nullptr) {
+                for (auto it : h->next) {
+                    pfix.push_back(it.key());
+                    sortpft(it.value(), d + 1, pfix);
+                    pfix.pop_back();
+                }
+                if (h->eos) {
+                    for (int i = 0; i < d; i++) cout<<"  ";
+                    cout<<pfix<<endl;
+                }
             }
-            delete h;
-            
         }
     public:
         PrefixTrie() {
@@ -30,7 +35,13 @@ class PrefixTrie {
             root->eos = false;
         }
         ~PrefixTrie() {
-            cleanup(root);
+            delete root;
+        }
+        int size() const {
+            return count;
+        }
+        bool empty() {
+            return count == 0;
         }
         void insert(string key, T value) {
             trienode* x = root;
@@ -65,6 +76,11 @@ class PrefixTrie {
                 x = x->next[c];
             }
             return prefix;
+        }
+        void sort() {
+            string p;
+            sortpft(root, 0, p);
+            cout<<endl;
         }
 };
 

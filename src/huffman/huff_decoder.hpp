@@ -1,13 +1,11 @@
 #ifndef huff_decoder_hpp
 #define huff_decoder_hpp
-#include "../hashmap.hpp"
 #include "../bitstream.hpp"
 #include "../stringbuffer.hpp"
 #include "huffnode.hpp"
 
 class HuffDecoder {
     private:
-        HashMap<char, string> encoding;
         link huffmanTree;
         BitStream trieStream;
         HuffmanNode* decodeTrie();

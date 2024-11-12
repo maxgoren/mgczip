@@ -42,6 +42,12 @@ class HashMap {
         HTIterator<entry> iterator() {
             return table.iterator();
         }
+        HTIterator<entry> begin() {
+            return table.begin();
+        }
+        HTIterator<entry> end() {
+            return table.end();
+        }
         V& operator[](K key) {
             if (!contains(key)) {
                 entry kvp(key, V());

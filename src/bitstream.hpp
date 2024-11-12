@@ -9,7 +9,12 @@ class BitStream {
         std::vector<unsigned char> buffer;
         int bitpos;
         int bitcount;
+        int getByteIdx();
+        int getBitIdx();
+        bool getBitAtX(int byteIndex, int bitIndex);
+        void setBitAtX(int byteIndex, int bitIndex);
     public:
+        BitStream(const string& str);
         BitStream();
         BitStream(const BitStream& bs);
         bool readBit();
@@ -18,9 +23,9 @@ class BitStream {
         int readInt(int width);
         void writeBit(bool bit);
         void writeInt(int value, int numBits);
-        void writeChar(char value, int numBits);
+        void writeChar(char value, int numBits = 8);
         int size();
-        void start();
+        BitStream& start();
         int offset();
         bool done();
         void flush();
@@ -38,6 +43,14 @@ BitStream::BitStream(const BitStream& bs) {
     buffer = bs.buffer;
 }
 
+BitStream::BitStream(const string& str) {
+    bitpos = 0;
+    bitcount = 0;
+    for (char c : str) {
+        writeChar(c);
+    }
+}
+
 bool BitStream::readBit() {
     int byteIndex = bitpos / 8;
     int bitIndex = bitpos % 8;
@@ -45,7 +58,7 @@ bool BitStream::readBit() {
         cout<<"End of stream."<<endl;
         return false;
     }
-    bool bit = (buffer[byteIndex] & (1 << bitIndex)) != 0;
+    bool bit = getBitAtX(byteIndex, bitIndex);
     bitpos++;
     return bit;
 }
@@ -80,7 +93,7 @@ void BitStream::writeBit(bool bit) {
     if (byteIndex >= buffer.size())
         buffer.push_back(0);
     if (bit)
-        buffer[byteIndex] |= (1 << bitIndex);
+        setBitAtX(byteIndex, bitIndex);
     bitpos++;
     bitcount++;
 }
@@ -97,12 +110,21 @@ void BitStream::writeChar(char value, int numBits) {
     }
 }
 
+bool BitStream::getBitAtX(int byteIndex, int bitIndex) {
+    return (buffer[byteIndex] & (1 << bitIndex));
+}
+
+void BitStream::setBitAtX(int byteIndex, int bitIndex) {
+    buffer[byteIndex] |= (1 << bitIndex);
+}
+
 int BitStream::size() {
     return bitcount;
 }
 
-void BitStream::start() {
+BitStream& BitStream::start() {
     bitpos = 0;
+    return *this;
 }
 
 int BitStream::offset() {

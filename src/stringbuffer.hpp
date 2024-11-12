@@ -18,6 +18,7 @@ class StringBuffer {
         void init(string line);
         unsigned char get();
         unsigned char advance();
+        string& getBuffer();
         void readBinaryFile(string filename);
 };
 
@@ -66,6 +67,10 @@ void StringBuffer::readBinaryFile(string filename) {
     input.resize(length);
     ifile.read(reinterpret_cast<char*>(input.data()), length);
     init(input);
+}
+
+string& StringBuffer::getBuffer() {
+    return buff;
 }
 
 #endif

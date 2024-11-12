@@ -46,8 +46,8 @@ void HuffEncoder::cleanup(link node) {
 }
 
 void HuffEncoder::printEncodingTable() {
-    for (auto it = encoding.iterator(); !it.done(); it.next()) {
-        cout<<it.get().key()<<": "<<it.get().value()<<endl;
+    for (auto it : encoding) {
+        cout<<it.key()<<": "<<it.value()<<endl;
     }
     cout<<"--------------"<<endl;
 }
@@ -92,9 +92,9 @@ void HuffEncoder::encodeTrie(HuffmanNode* x) {
 void HuffEncoder::buildHuffmanTree(StringBuffer data) {
     MinHeap<link, HuffCmp> pq;
     HashMap<char, link> freq = computeFrequencies(data);
-    for (auto it = freq.iterator(); !it.done(); it.next()) {
-        pq.push(it.get().value());
-        cout<<it.get().value()->symbol<<"("<<it.get().value()->frequency<<") ";
+    for (auto it : freq) {
+        pq.push(it.value());
+        cout<<it.value()->symbol<<"("<<it.value()->frequency<<") ";
     }
     cout<<endl;
     while (pq.size() > 1) {
