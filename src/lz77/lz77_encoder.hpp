@@ -9,11 +9,12 @@ using namespace std;
 
 class LZ77Encoder {
     private:
-        vector<LZTriple> parseToTriples(string input);
         void addHeader(BitStream& bs);
+        vector<LZTriple> parseToTriples(string input);
     public:
         LZ77Encoder();
         BitStream compress(StringBuffer sb);
+        vector<LZTriple> encodeToTriple(StringBuffer sb);
 };
 
 LZ77Encoder::LZ77Encoder() {
@@ -22,12 +23,17 @@ LZ77Encoder::LZ77Encoder() {
 
 BitStream LZ77Encoder::compress(StringBuffer sb) {
     BitStream bs;
+    addHeader(bs);
     for (LZTriple t : parseToTriples(sb.getBuffer())) {
         bs.writeInt(t.offset, 12);
-        bs.writeInt(t.length, 12);
+        bs.writeInt(t.length, 8);
         bs.writeChar(t.symbol, 8);
     }
     return bs;
+}
+
+vector<LZTriple> LZ77Encoder::encodeToTriple(StringBuffer sb) {
+    return parseToTriples(sb.getBuffer());
 }
 
 void LZ77Encoder::addHeader(BitStream& bs) {

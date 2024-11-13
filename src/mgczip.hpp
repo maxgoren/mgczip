@@ -16,16 +16,22 @@ class MGCZip {
     private:
         void calculateCompressionRatio(string filename);
         void writeCompressedFile(BitStream compressed, string filename);
-        BitStream compressWithBoth(StringBuffer sbuff);
-        void decompressWithBoth(StringBuffer sbuff, string outfile);
     public:
         MGCZip();
         void compress(string filename, METHOD method);
         void decompress(string filename, METHOD method);
+        void deflate(string filename);
 };
 
 MGCZip::MGCZip() {
 
+}
+
+void MGCZip::deflate(string filename) {
+    StringBuffer sb;
+    sb.readBinaryFile(filename);
+    LZ77Encoder lz;
+    lz.encodeToTriple(sb);
 }
 
 void MGCZip::decompress(string filename, METHOD method) {
@@ -66,14 +72,6 @@ void MGCZip::compress(string filename, METHOD method) {
     }
     writeCompressedFile(bs, filename);
     calculateCompressionRatio(filename);
-}
-
-void MGCZip::decompressWithBoth(StringBuffer sb, string filename) {
-        HuffDecoder huff;
-        LZWDecoder lzw;
-        lzw.uncompress(sb, filename);
-        cout<<"LZW done."<<endl;
-        huff.uncompress(sb, filename.substr(0, filename.size() - 4) + ".2");
 }
 
 void MGCZip::writeCompressedFile(BitStream compressed, string filename) {

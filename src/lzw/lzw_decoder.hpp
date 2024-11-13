@@ -44,7 +44,7 @@ void LZWDecoder::uncompress(StringBuffer sb, string outfile) {
 
 void LZWDecoder::validateHeader(BitStream& bs) {
     bool pass = true;
-    string header = "MGCL";
+    string header = "MGCW";
     for (char c : header) {
         if (c != bs.readChar()) {
             pass = false;

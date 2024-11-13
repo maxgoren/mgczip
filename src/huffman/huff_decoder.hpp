@@ -38,9 +38,9 @@ void HuffDecoder::uncompress(StringBuffer compressed, string outfile) {
     if (opf.is_open()) {
         for (unsigned char c : uncompressed) {
             opf << c;
-            cout<<c;
+            //cout<<c;
         }
-        cout<<endl;
+        //cout<<endl;
     }
     opf.close();       
 }
@@ -85,9 +85,7 @@ string HuffDecoder::unsqueeze(BitStream encoded) {
     trieStream.start();
     validateHeader();
     huffmanTree = decodeTrie();
-    Levelorder()(huffmanTree);
     int length = trieStream.readInt();
-    cout<<"Length: "<<length<<endl;
     while (!trieStream.done()) {
         if (x == nullptr) {
             x = huffmanTree;

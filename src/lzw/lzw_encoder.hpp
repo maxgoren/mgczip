@@ -31,7 +31,7 @@ void LZWEncoder::addHeader(BitStream& resultStream) {
     resultStream.writeChar('M',8);
     resultStream.writeChar('G', 8);
     resultStream.writeChar('C', 8);
-    resultStream.writeChar('L', 8);
+    resultStream.writeChar('W', 8);
 }
 
 BitStream LZWEncoder::squeeze(StringBuffer istrbuff) {
@@ -53,7 +53,6 @@ BitStream LZWEncoder::squeeze(StringBuffer istrbuff) {
     while (str.size() > 0) {
         string s = st.longestPrefix(str);
         bs.writeInt(st.get(s), bit_width);
-        cout<<st.get(s)<<": "<<s<<endl;
         int t = s.length();
         if (t < str.length() && code < max_code_words) {
             st.insert(str.substr(0, t+1), code++);

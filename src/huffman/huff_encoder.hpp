@@ -11,7 +11,6 @@ class HuffEncoder {
         HashMap<char, string> encoding;
         link huffmanTree;
         BitStream resultStream;
-        void printEncodingTable();
         HashMap<char, link> computeFrequencies(StringBuffer data);
         void generateEncodingTable(link h, string prefix);
         void addHeader();
@@ -45,12 +44,6 @@ void HuffEncoder::cleanup(link node) {
     }
 }
 
-void HuffEncoder::printEncodingTable() {
-    for (auto it : encoding) {
-        cout<<it.key()<<": "<<it.value()<<endl;
-    }
-    cout<<"--------------"<<endl;
-}
 
 HashMap<char, link> HuffEncoder::computeFrequencies(StringBuffer data) {
     HashMap<char, link> freq;
@@ -94,9 +87,7 @@ void HuffEncoder::buildHuffmanTree(StringBuffer data) {
     HashMap<char, link> freq = computeFrequencies(data);
     for (auto it : freq) {
         pq.push(it.value());
-        cout<<it.value()->symbol<<"("<<it.value()->frequency<<") ";
     }
-    cout<<endl;
     while (pq.size() > 1) {
         link a = pq.pop();
         link b = pq.pop();
@@ -104,7 +95,6 @@ void HuffEncoder::buildHuffmanTree(StringBuffer data) {
         pq.push(tmp);
     }
     huffmanTree = pq.pop();
-    Levelorder()(huffmanTree);
 }
 
 void HuffEncoder::addHeader() {
@@ -119,7 +109,6 @@ BitStream HuffEncoder::squeeze(StringBuffer data) {
     string prefix, output;
     buildHuffmanTree(data);
     generateEncodingTable(huffmanTree, prefix);
-    printEncodingTable();
     addHeader();
     encodeTrie(huffmanTree);
     while (!data.done()) {

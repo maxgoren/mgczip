@@ -28,10 +28,11 @@ string LZ77Decoder::uncompress(StringBuffer sb, string outfile) {
     }
     string output;
     input.start();
+    validateHeader(input);
     LZTriple m;
     while (!input.done()) {
         m.offset = input.readInt(12);
-        m.length = input.readInt(12);
+        m.length = input.readInt(8);
         m.symbol = input.readChar();
         if (m.length > 0) {
             int spos = output.size() - m.offset;
@@ -61,7 +62,7 @@ void LZ77Decoder::validateHeader(BitStream& bs) {
         }
     }
     if (!pass) {
-        cout<<"Invalid Header, aborting."<<endl;
+        cout<<" Invalid Header, aborting."<<endl;
         exit(0);
     } else {
         cout<<", Headers Match! Decompressing..."<<endl;
