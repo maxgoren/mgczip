@@ -160,14 +160,16 @@ class HashTable {
         }
         void insert(T info) {
             unsigned int idx = Hash<T>()(info) % maxn;
-            while (table[idx].inuse && table[idx].info != info) idx = (idx + 1) % maxn;
+            int m = 1;
+            while (table[idx].inuse && table[idx].info != info) { idx = (idx + (2*m-1)) % maxn; m++; }
             table[idx] = info;
             n++;
             if (n >= maxn/2) { grow(); }
         }
         T& search(T info) {
             unsigned int idx = Hash<T>()(info) % maxn;
-            while (table[idx].inuse && table[idx].info != info) idx = (idx + 1) % maxn;
+            int m = 1;
+            while (table[idx].inuse && table[idx].info != info) { idx = (idx + (2*m-1)) % maxn; m++; }
             return table[idx].info;
         }
         bool contains(T info) {
@@ -177,15 +179,18 @@ class HashTable {
             if (!contains(info))
                 return;
             unsigned int idx = Hash<T>()(info) % maxn;
-            while (table[idx].inuse && table[idx].info != info) idx = (idx + 1) % maxn;
+            int m = 1;
+            while (table[idx].inuse && table[idx].info != info) { idx = (idx + (2*m-1)) % maxn; m++; }
             table[idx].clear();
-            idx = (idx+1) % maxn;
+            idx = (idx+(2*m-1)) % maxn;
+            m++;
             while (table[idx].inuse) {
                 T toreplace = table[idx].info;
                 table[idx].clear();
                 n--;
                 insert(toreplace);
-                idx = (idx+1) % maxn;
+                idx = (idx+(2*m-1)) % maxn;
+                m++;
             }
             n--;
         }

@@ -85,7 +85,7 @@ string HuffDecoder::unsqueeze(BitStream encoded) {
     trieStream.start();
     validateHeader();
     huffmanTree = decodeTrie();
-    int length = trieStream.readInt();
+    int i = 0;
     while (!trieStream.done()) {
         if (x == nullptr) {
             x = huffmanTree;
@@ -96,8 +96,11 @@ string HuffDecoder::unsqueeze(BitStream encoded) {
         } else {
             x = trieStream.readBit() ? x->right:x->left;
         }
+        cout<<".";
+        i++;
     }
     if (isLeaf(x)) result.push_back(x->symbol);
+    cout<<" Done! "<<i<<" bits read."<<endl;
     return result;
 }
 

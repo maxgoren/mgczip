@@ -112,12 +112,10 @@ BitStream HuffEncoder::squeeze(StringBuffer data) {
     addHeader();
     encodeTrie(huffmanTree);
     while (!data.done()) {
-        output += encoding.find(data.get()).value();
+        for (char c : encoding.find(data.get()).value()) {
+            resultStream.writeBit(c == '1');
+        }
         data.advance();
-    }
-    resultStream.writeInt(output.size(), 8);
-    for (unsigned char c : output) {
-        resultStream.writeBit(c == '1');
     }
     return resultStream;
 }

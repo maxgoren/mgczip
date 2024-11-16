@@ -73,7 +73,7 @@ char BitStream::readChar() {
 
 int BitStream::readInt() {
     int value = 0;
-    for (int i = 7; i >= 0; --i) {
+    for (int i = 15; i >= 0; --i) {
         value |= (readBit() << i);
     }
     return value;

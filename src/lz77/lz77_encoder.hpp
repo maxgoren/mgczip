@@ -59,7 +59,7 @@ vector<LZTriple> LZ77Encoder::parseToTriples(string input) {
                 if (wp - j > match_len) {
                     match_len = wp-j;
                     match_left = j;
-                    j += match_len+1;
+                    j += match_len;
                 }
             }
             j++;
