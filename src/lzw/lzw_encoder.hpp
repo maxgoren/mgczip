@@ -35,19 +35,13 @@ void LZWEncoder::addHeader(BitStream& resultStream) {
 }
 
 BitStream LZWEncoder::squeeze(StringBuffer istrbuff) {
-    string str;
-    while (!istrbuff.done()) {
-        str.push_back(istrbuff.get());
-        istrbuff.advance();
-    }
+    string str = istrbuff.getBuffer();
     string output;
     PrefixTrie<int> st;
     BitStream bs;
     addHeader(bs);
     for (int i = 0; i < num_chars; i++) {
-        string key;
-        key.push_back((char)i);
-        st.insert(key, i);
+        st.insert(key, string((char)i, 1));
     }
     int code = num_chars+1;
     while (str.size() > 0) {

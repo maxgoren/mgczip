@@ -9,6 +9,7 @@ class HuffDecoder {
         link huffmanTree;
         BitStream trieStream;
         HuffmanNode* decodeTrie();
+        BitStream stringBufferToBitStream(StringBuffer compressed);
         void validateHeader();
         string unsqueeze(BitStream encoded);
         void cleanup(link node);
@@ -27,20 +28,22 @@ HuffDecoder::~HuffDecoder() {
     cleanup(huffmanTree);
 }
 
-void HuffDecoder::uncompress(StringBuffer compressed, string outfile) {
-    BitStream inf;
+BitStream HuffDecoder::stringBufferToBitStream(StringBuffer compressed) {
+     BitStream inf;
     while (!compressed.done()) { 
         inf.writeChar(compressed.get(), 8); 
         compressed.advance(); 
     }
-    string uncompressed = unsqueeze(inf);
+    return inf;
+}
+
+void HuffDecoder::uncompress(StringBuffer compressed, string outfile) {
+    string uncompressed = unsqueeze(stringBufferToBitStream(compressed));
     ofstream opf(outfile);
     if (opf.is_open()) {
         for (unsigned char c : uncompressed) {
             opf << c;
-            //cout<<c;
         }
-        //cout<<endl;
     }
     opf.close();       
 }
@@ -57,7 +60,9 @@ HuffmanNode* HuffDecoder::decodeTrie() {
     if (trieStream.readBit()) {
         return new HuffmanNode(trieStream.readChar(), 0, nullptr, nullptr);
     }
-    return new HuffmanNode('\0', 0, decodeTrie(), decodeTrie());
+    link left = decodeTrie();
+    link right = decodeTrie();
+    return new HuffmanNode('\0', 0, left, right);
 }
 
 void HuffDecoder::validateHeader() {

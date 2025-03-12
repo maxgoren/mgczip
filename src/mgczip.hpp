@@ -31,7 +31,17 @@ void MGCZip::deflate(string filename) {
     StringBuffer sb;
     sb.readBinaryFile(filename);
     LZ77Encoder lz;
-    lz.encodeToTriple(sb);
+    vector<LZTriple> triples = lz.encodeToTriple(sb);
+    string asString;
+    for (LZTriple triple : triples) {
+        asString += to_string(triple.offset) + to_string(triple.length) + string(1, triple.symbol);
+    }
+    StringBuffer sb2;
+    sb2.init(asString);
+    HuffEncoder huff;
+    BitStream bs = huff.compress(sb2);
+    writeCompressedFile(bs, filename);
+    calculateCompressionRatio(filename);
 }
 
 void MGCZip::decompress(string filename, METHOD method) {
